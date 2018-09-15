@@ -2,3 +2,4 @@ sample_submission.csv
 Input/train.csv
 Input/test.csv
 .Rproj.user
+*.csv

@@ -1,0 +1,122 @@
+---
+title: "CRP EDA"
+output: html_notebook
+---
+
+This is a simple Exploratory Data Analysis in order to get a little grip of the variables in dataset.
+
+# Prerequisites
+
+The first thing we need is get what variables are going to be necessary, for this the first step is to get the variables in the json columns and transform them into separate variables.
+
+The second step is to get rid of all the constant variables in both train and test datasets.
+
+# 1. Understanding the data
+
+**fullVisitorId**- A unique identifier for each user of the Google Merchandise Store.
+
+**channelGrouping** - The channel via which the user came to the Store.
+
+**date** - The date on which the user visited the Store.
+
+**device** - The specifications for the device used to access the Store.
+
+  * **browser**: The browser used to access the Store.
+
+  * **operatingSystem**: Operating system of the device.
+  
+  * **isMobile**: Whether the access was from a mobile or tablet.
+  
+  * **deviceCategory**: specifies if the device is a Table, a Mobile or a Desktop.
+ 
+
+**geoNetwork** - This section contains information about the geography of the user.
+
+  * **continent**: Selfexplanatory
+
+  * **subContinent**: A more specific continent information.
+  
+  * **country**: Selfexplanatory
+  
+  * **region**: Selfexplanatory
+  
+  * **metro**: mostly north american cities, includes state.
+
+  * **networkDomain**: Network provider.
+
+**sessionId** - A unique identifier for this visit to the store.
+
+**socialEngagementType** - Engagement type, either "Socially Engaged" or "Not Socially Engaged".
+
+**totals** - This section contains aggregate values across the session.
+
+  * **hits**: Each loaded item.
+  
+  * **pageviews**: The number of times a page was viewed.
+  
+  * **bounces**: Visits that consist of one page-view.
+
+  * **newVisits**: New visitis to the domain
+  
+  * **transactionRevenue**: The target to predict, only in train dataset.
+
+**trafficSource** - This section contains information about the Traffic Source from which the session originated.
+
+  * **campaign**: 
+  
+  * **source**: The previous source that directed to the Store.
+  
+  * **medium**: Describes how the user got there, beacause a referral, by their own (organic), ...
+
+  * **keyword**: Keywords used in a search, for example:  "you tube tshirt", "youtuber water bottle", "www dot google dot com" 
+  
+  * **adwordsClickInfo**: Extra information provided by AdWords
+  
+    + page
+    
+    + slot: position of the add, on Top or Right-Hand Side
+    
+    + gclId: Google Click Identifier appended in the URL used when auto-taggin is enabled .
+    
+    + adNetworkType: Origin of the search, can be Google Search or Search partners
+
+**visitId** - An identifier for this session. This is part of the value usually stored as the _utmb cookie. This is only unique to the user. For a completely unique ID, you should use a combination of fullVisitorId and visitId.
+
+**visitNumber** - The session number for this user. If this is the first session, then this is set to 1.
+
+**visitStartTime** - The timestamp (expressed as POSIX time).
+
+
+Now let's load the dataset:
+
+```{r message=FALSE, warning=FALSE, paged.print=TRUE}
+library(data.table)
+
+train <- fread('extraFiles/flattenTrain.csv')
+head(train)
+```
+
+Let's check for NA's:
+
+```{r}
+naCount <- apply(train, 2, function(x) sum(is.na(x)))
+naCount <- data.frame(names = names(naCount), count = naCount)
+print(naCount)
+```
+
+```{r fig.height=15, fig.width=15}
+library(ggplot2)
+naPlot <- ggplot(naCount, aes(names, weight = count, fill = names)) + 
+                geom_bar() + 
+                coord_flip() +
+                scale_y_continuous(expand = c(0, 0))
+naPlot
+```
+
+Now lets see the percentage of NAs of each variable:
+
+```{r}
+naCount$pctNA <- naCount$count*100 / nrow(train)
+print(as.data.frame(t(naCount)))
+```
+
